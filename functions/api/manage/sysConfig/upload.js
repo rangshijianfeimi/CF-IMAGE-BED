@@ -316,6 +316,8 @@ export async function getUploadConfig(db, env) {
     webdav.loadBalance = webdavLoadBalance
 
 
+    settings.defaultUploadNameType = settingsKV.defaultUploadNameType || 'default'
+
     settings.telegram = telegram
     settings.cfr2 = cfr2
     settings.s3 = s3
