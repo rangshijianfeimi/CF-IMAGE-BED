@@ -30,16 +30,16 @@ jobs:
         if: steps.check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
-      # 锁定 Node 22 环境并开启 npm 缓存
       - name: Setup Node.js
         if: steps.check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
+      # 不使用 --omit=dev，确保 Monorepo 的公共模块正常构建
       - name: Install dependencies
         if: steps.check.outputs.skip != 'true'
-        run: npm ci --workspace=@cloudflare-imgbed/common --workspace=@cloudflare-imgbed/worker --omit=dev
+        run: npm ci
 
       - name: Generate worker routes
         if: steps.check.outputs.skip != 'true'
@@ -55,7 +55,6 @@ jobs:
           WORKER_VARS: ${{ secrets.WORKER_VARS }}
         run: node deploy/worker/generate-toml.js
 
-      # 核心修复步骤：使用直接执行 npm/npx 部署，替代可能存在 Node 24 兼容问题的 Action 包装层
       - name: Deploy with Wrangler v4
         if: steps.check.outputs.skip != 'true'
         env:
