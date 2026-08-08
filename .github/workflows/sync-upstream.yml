@@ -39,7 +39,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPSTREAM_REPO: MarSeventh/CloudFlare-ImgBed
           UPSTREAM_BRANCH: main
-          ALLOW_BREAKING_UPDATE: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_breaking_update == true }}
+          # 修复点：对于定时任务(schedule)，默认设为 true 允许同步；对于手动触发(workflow_dispatch)，则遵从复选框输入
+          ALLOW_BREAKING_UPDATE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.confirm_breaking_update == true) }}
         run: bash .github/breaking-updates/scripts/breaking-update-guard.sh check
 
       - name: Sync upstream changes
