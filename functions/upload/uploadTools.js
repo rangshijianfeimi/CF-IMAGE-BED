@@ -1,4 +1,4 @@
-import { fetchSecurityConfig } from "../utils/sysConfig";
+import { fetchSecurityConfig, fetchUploadConfig } from "../utils/sysConfig";
 import { purgeCFCache, purgeRandomFileListCache, purgePublicFileListCache } from "../utils/purgeCache";
 import { addFileToIndex } from "../utils/indexManager.js";
 import { getDatabase } from '../utils/databaseAdapter.js';
@@ -217,7 +217,17 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
 
     const fileExt = resolveFileExt(fileName, fileType);
 
-    const nameType = url.searchParams.get('uploadNameType') || 'default';
+    const nameTypeParam = url.searchParams.get('uploadNameType');
+    let nameType = nameTypeParam || 'default';
+    if (!nameTypeParam) {
+        try {
+            const uploadConfig = await fetchUploadConfig(env);
+            const configuredType = uploadConfig?.defaultUploadNameType;
+            if (configuredType && configuredType !== 'default') {
+                nameType = configuredType;
+            }
+        } catch (e) {}
+    }
     const uploadFolder = url.searchParams.get('uploadFolder') || '';
     const normalizedFolder = sanitizeUploadFolder(uploadFolder);
 
