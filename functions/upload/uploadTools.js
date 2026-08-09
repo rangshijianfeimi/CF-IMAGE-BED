@@ -254,6 +254,12 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
         baseId = normalizedFolder ?
             `${normalizedFolder}/${unique_index}${suffix ? '-' + suffix : ''}.${fileExt}` :
             `${unique_index}${suffix ? '-' + suffix : ''}.${fileExt}`;
+    } else if (nameType === 'timestamp') {
+        const nameStem = fileName.substring(0, fileName.lastIndexOf('.'));
+        const namePart = nameStem.includes('-') ? nameStem.substring(nameStem.lastIndexOf('-') + 1) : nameStem;
+        baseId = normalizedFolder ?
+            `${normalizedFolder}/${unique_index}-${namePart}.${fileExt}` :
+            `${unique_index}-${namePart}.${fileExt}`;
     } else {
         baseId = normalizedFolder ? `${normalizedFolder}/${unique_index}_${fileName}` : `${unique_index}_${fileName}`;
     }
@@ -282,6 +288,15 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
             duplicateId = normalizedFolder ?
                 `${normalizedFolder}/${baseName}(${counter}).${fileExt}` :
                 `${baseName}(${counter}).${fileExt}`;
+        } else if (nameType === 'timestamp') {
+            const nameStem = fileName.substring(0, fileName.lastIndexOf('.'));
+            const namePart = nameStem.includes('-') ? nameStem.substring(nameStem.lastIndexOf('-') + 1) : nameStem;
+            const baseName = `${unique_index}-${namePart}`;
+            const nameWithoutExt = baseName.substring(0, baseName.lastIndexOf('.'));
+            const ext = baseName.substring(baseName.lastIndexOf('.'));
+            duplicateId = normalizedFolder ?
+                `${normalizedFolder}/${nameWithoutExt}(${counter})${ext}` :
+                `${nameWithoutExt}(${counter})${ext}`;
         } else {
             const baseName = `${unique_index}_${fileName}`;
             const nameWithoutExt = baseName.substring(0, baseName.lastIndexOf('.'));
@@ -302,6 +317,7 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
         }
     }
 }
+
 
 // 基于uploadId的一致性渠道选择
 export function selectConsistentChannel(channels, uploadId, loadBalanceEnabled) {
