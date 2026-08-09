@@ -226,7 +226,8 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
             if (configuredType && configuredType !== 'default') {
                 nameType = configuredType;
             }
-        } catch (e) {}
+        } catch (e) {
+        }
     }
     const uploadFolder = url.searchParams.get('uploadFolder') || '';
     const normalizedFolder = sanitizeUploadFolder(uploadFolder);
