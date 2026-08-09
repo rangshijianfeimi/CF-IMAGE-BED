@@ -219,10 +219,12 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
 
     const nameTypeParam = url.searchParams.get('uploadNameType');
     let nameType = nameTypeParam || 'default';
+    let configuredType = null;
+    let pageType = null;
     if (!nameTypeParam) {
         try {
             const uploadConfig = await fetchUploadConfig(env);
-            const configuredType = uploadConfig?.defaultUploadNameType;
+            configuredType = uploadConfig?.defaultUploadNameType;
             if (configuredType && configuredType !== 'default') {
                 nameType = configuredType;
             }
@@ -230,13 +232,13 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
         // Also check page config (where defaultUploadNameType is actually saved)
         try {
             const pageConfig = await fetchPageConfig(env);
-            const pageType = pageConfig?.config?.find(c => c.id === 'defaultUploadNameType')?.value;
+            pageType = pageConfig?.config?.find(c => c.id === 'defaultUploadNameType')?.value;
             if (pageType && pageType !== 'default') {
                 nameType = pageType;
             }
         } catch (e) {}
     }
-    console.log('[UPLOAD]', { nameTypeParam, configuredType, nameType, fileName, fileExt });
+    console.log('[UPLOAD]', { nameTypeParam, configuredType, pageType, nameType, fileName, fileExt });
     const uploadFolder = url.searchParams.get('uploadFolder') || '';
     const normalizedFolder = sanitizeUploadFolder(uploadFolder);
 
