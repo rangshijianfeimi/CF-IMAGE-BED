@@ -229,6 +229,7 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
         } catch (e) {
         }
     }
+    console.log('[UPLOAD]', { nameTypeParam, configuredType, nameType, fileName, fileExt });
     const uploadFolder = url.searchParams.get('uploadFolder') || '';
     const normalizedFolder = sanitizeUploadFolder(uploadFolder);
 
