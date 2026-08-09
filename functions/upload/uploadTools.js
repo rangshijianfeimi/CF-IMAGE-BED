@@ -1,4 +1,4 @@
-import { fetchSecurityConfig, fetchUploadConfig } from "../utils/sysConfig";
+import { fetchSecurityConfig, fetchUploadConfig, fetchPageConfig } from "../utils/sysConfig";
 import { purgeCFCache, purgeRandomFileListCache, purgePublicFileListCache } from "../utils/purgeCache";
 import { addFileToIndex } from "../utils/indexManager.js";
 import { getDatabase } from '../utils/databaseAdapter.js';
@@ -226,8 +226,15 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
             if (configuredType && configuredType !== 'default') {
                 nameType = configuredType;
             }
-        } catch (e) {
-        }
+        } catch (e) {}
+        // Also check page config (where defaultUploadNameType is actually saved)
+        try {
+            const pageConfig = await fetchPageConfig(env);
+            const pageType = pageConfig?.config?.find(c => c.id === 'defaultUploadNameType')?.value;
+            if (pageType && pageType !== 'default') {
+                nameType = pageType;
+            }
+        } catch (e) {}
     }
     console.log('[UPLOAD]', { nameTypeParam, configuredType, nameType, fileName, fileExt });
     const uploadFolder = url.searchParams.get('uploadFolder') || '';
@@ -266,8 +273,13 @@ export async function buildUniqueFileId(context, fileName, fileType = 'applicati
         baseId = normalizedFolder ? `${normalizedFolder}/${unique_index}_${fileName}` : `${unique_index}_${fileName}`;
     }
 
-    if (await db.get(baseId) === null) {
-        return baseId;
+    try {
+        if (await db.get(baseId) === null) {
+            return baseId;
+        }
+    } catch (e) {
+        console.error('[UPLOAD] db.get error:', e.message);
+        throw e;
     }
 
     let counter = 1;
